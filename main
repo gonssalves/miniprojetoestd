@@ -1,0 +1,29 @@
+from fila import *
+
+if __name__ == '__main__':
+    def entrada_compra():
+        entrada = input('>')
+        
+        # if entrada == 'fim': 
+        #     compradas.show()
+        #     return
+        
+        if entrada == '.': 
+            entrada_venda()
+            return
+        else:
+            compradas.enqueue(entrada)
+            entrada_compra()
+        
+        
+    def entrada_venda(): 
+        entrada = input('>>')
+        if entrada == '.':
+            compradas.show()
+            vendidas.show()
+            return
+        else:
+            vendidas.enqueue(entrada)
+            entrada_venda()
+    
+entrada_compra()
