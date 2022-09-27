@@ -49,7 +49,7 @@ class Fila:
     if self._dados[ultimaPosicaoOcupada] != None:
       del self._dados[ultimaPosicaoOcupada]
     else:
-      FilaVazia('Erro ao remover, pois a fila está vazia.')
+      raise FilaVazia('Erro ao remover, pois a fila está vazia.')
     
   def show(self):
     print(self)
