@@ -1,6 +1,5 @@
-import os
+from os import system, name, _exit
 from typing import NoReturn
-from unittest import result
 from projeto import *
 from time import sleep
 
@@ -9,7 +8,7 @@ if __name__ == '__main__':
   acaoVendida = FilaArray()
   capital = FilaArray()
 
-  clear = lambda: os.system('cls' if os.name == 'nt' else 'clear')
+  clear = lambda: system('cls' if name == 'nt' else 'clear')
   clear()
 
   def apresentacao() -> bool:
@@ -46,43 +45,50 @@ if __name__ == '__main__':
     acaoVendida.enqueue(valores)
 
   def total(acoes: FilaArray, name: str):
-    print(f'<----{name}---->')
+    copyacoes = acoes._dados.copy()
+    print(f'\n<----{name}---->')
     valorAcao = 0
-    for index in range(acoes._tamanho):
-      firstAcao = acoes.dequeue()
-      unidade = 1
-      for i in firstAcao:
-        unidade *= float(i)
-      
-      valorAcao += unidade
+    for index in range(len(copyacoes)):
+      firstAcao = copyacoes[index]
+      if firstAcao != None:
+        unidade = 1
+        for i in firstAcao:
+          unidade *= float(i)
+
+        valorAcao += unidade
     print(f'valor {name} R$: {valorAcao:.2f}')
 
-  def wallet():
+  def wallet(acCompra: FilaArray, acVenda: FilaArray):
+    copyCompras = acCompra._dados.copy()
+    copyVendida = acVenda._dados.copy()
     purchaseValue: float = 0
     saleValue: float = 0
     capital: float = 0
-    for index in range(acaoComprada._tamanho):
-      firstPurchase = acaoComprada.dequeue()
+
+    for index in range(len(copyCompras)):
+      firstPurchase = copyCompras[index]
       unidade = 1
-      for i in firstPurchase:
-        unidade *= float(i)
-      purchaseValue += unidade
-
-      for index in range(acaoVendida._tamanho):
-        firstSale = acaoVendida.dequeue()
-        unidade = 1
-        for i in firstSale:
+      if firstPurchase != None:
+        for i in firstPurchase:
           unidade *= float(i)
-        saleValue += unidade
-      print('compra =>', purchaseValue)
-      print('venda =>', saleValue)
-      
-      capital += saleValue - purchaseValue
-    print(capital)
+        purchaseValue += unidade
 
-  def dias() -> NoReturn :
-    if apresentacao():
-      dia = 1
+    if len(copyVendida) > 0:
+        for index in range(len(copyVendida)):
+          firstSale = copyVendida[index]
+          unidade = 1
+          if firstSale != None:
+            for i in firstSale:
+              unidade *= float(i)
+            saleValue += unidade
+
+        capital += saleValue - purchaseValue
+        print(capital)
+    else:
+      print(f'\nVocê não possui vendas seu valor em compras é R$: {purchaseValue:.2f}')
+
+  def entradaDado(dia):
+    try:
       while True:
         print(
         f'''
@@ -92,21 +98,40 @@ if __name__ == '__main__':
         ''')
         transacoes = input('Informe a quantidade, valor e o tipo de transição: ').lower().strip()
         if transacoes == 'exit':
-          break
+          _exit(0)
         elif transacoes == 'amount':
           total(acaoComprada, 'compras')
           total(acaoVendida, 'vendas')
-          break
+          sleep(2)
+          entradaDado(dia)
         elif transacoes == 'wallet':
-          wallet()
-          break
+          wallet(acaoComprada, acaoVendida)
+          sleep(2)
+          entradaDado(dia)
 
         transacoes = transacoes.split()
-        if transacoes[2] == 'c':
-          compras(transacoes[:2])
-        elif transacoes[2] == 'v':
-          vendas(transacoes[:2])
+        if len(transacoes) > 1:
+          if transacoes[2] == 'c':
+            dia+=1
+            compras(transacoes[:2])
+          elif transacoes[2] == 'v':
+            dia+=1
+            vendas(transacoes[:2])
+    except Exception as e:
+      if e:
+        print(e)
+      print('\nComando não reconhecido, digite uns dos comando expecificados!')
+      sleep(3)
+      clear()
+      entradaDado(dia)
 
-        dia+=1
 
-dias()
+  def main() -> NoReturn :
+    try:
+      if apresentacao():
+        entradaDado(1)
+    except Exception as e:
+      print(e)
+
+
+main()
