@@ -69,24 +69,34 @@ comprasCopia = Fila(10)
 vendas = Fila(10)
 
 print("digite suas compras:")
+contBack = 0
 while True:
   entradaCompras = input()
   if entradaCompras == "x":
     break
   elif entradaCompras == '<':
-    compras.removeLast()
-    comprasCopia.removeLast()
+    if contBack < 10:
+      compras.removeLast()
+      comprasCopia.removeLast()
+      contBack += 1
+    else:
+      print('Você não pode mais voltar. Você já voltou 10 operações.')
   else:
     compras.enqueue(entradaCompras)
     comprasCopia.enqueue(entradaCompras)
 
 print('Digite sua vendas:')
+contBack = 0
 while True:
   entradaVendas = input()
   if entradaVendas == "x":
     break
   elif entradaVendas == '<':
-    vendas.removeLast()
+    if contBack < 10:
+      vendas.removeLast()
+      contBack += 1
+    else:
+      print('Você não pode mais voltar. Você já voltou 10 operações.')
   else:
     vendas.enqueue(entradaVendas)
 
