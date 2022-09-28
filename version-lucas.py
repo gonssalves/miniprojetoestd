@@ -1,138 +1,230 @@
-class FilaVazia(Exception):
-  pass
+#from msilib import PID_TITLE
+from os import system, name, _exit
+from tkinter import SCROLL
+from typing import NoReturn
+from time import sleep
+from collections import deque
 
-class Fila:
-  def __init__(self, capacidade):
-    self._dados = [None] * capacidade
-    self._tamanho = 0
-    self._inicio = 0
 
-  def __len__(self):
-    return self._tamanho
+class FilaArray:
+  def __init__(self):
+    self._dados = deque([])
 
   def is_empty(self):
-    return self._tamanho == 0
-
-  def first(self):
-    if self.is_empty():
-      raise FilaVazia('A Fila está vazia')
-    return self._dados[self._inicio]
+    return len(self._dados) == 0
 
   def dequeue(self):
-    if self.is_empty():
-      raise FilaVazia('A Fila está vazia')
-    result = self._dados[self._inicio]
-    self._dados[self._inicio] = None
-    self._inicio = (self._inicio + 1) % len(self._dados)
-    self._tamanho -= 1
-    return result
+    if (not self.is_empty()):
+      return self._dados.popleft()
+    raise Exception('Fila vazia.')
 
-  def enqueue(self, e): # - - x x x - 
-    if self._tamanho == len(self._dados):
-      self._altera_tamanho(2 * len(self._dados))
-    disponivel = (self._inicio + self._tamanho) % len(self._dados)
-    self._dados[disponivel] = e
-    self._tamanho += 1
+  def enqueue(self, e):
+    self._dados.append(e)
 
-  def _altera_tamanho(self, novo_tamanho):   
-    dados_antigos = self._dados               # keep track of existing list
-    self._dados = [None] * novo_tamanho       # allocate list with new capacity
-    posicao = self._inicio
-    for k in range(self._tamanho):            # only consider existing elements
-      self._dados[k] = dados_antigos[posicao] # intentionally shift indices
-      posicao = (1 + posicao) % len(dados_antigos) # use dados_antigos size as modulus
-    self._inicio = 0                          # front has been realigned
-
+  def size(self):
+    return len(self._dados)
+  
   def removeLast(self):
-    ultimaPosicaoOcupada = ((self._inicio + self._tamanho) % len(self._dados)) - 1
-
-    if self._dados[ultimaPosicaoOcupada] != None:
-      del self._dados[ultimaPosicaoOcupada]
-    else:
-      raise FilaVazia('Erro ao remover, pois a fila está vazia.')
-    
-  def show(self):
-    print(self)
-
-  def __str__(self):
-    posicao = self._inicio
-    result = "["
-    for k in range(self._tamanho):
-      result += str(self._dados[posicao]) + ", "
-      posicao = (1 + posicao) % len(self._dados)
-    result += f'] tamanho: {len(self)} capacidade {len(self._dados)}\n'
-    return result
+    if (not self.is_empty()):
+      return self._dados.pop()
+    raise Exception ('Fila vazia')
 
 
-compras = Fila(10)
-comprasCopia = Fila(10)
-vendas = Fila(10)
+def apresentacao() -> bool:
+  print('\nO programa recebe dois tipos de entradas compras e vendas e para difereciar uma da outra precisa por a inicial de transação que é "c" para compras e "v" para vendas.\nEx: 100 30 c.')
+  inicializador = input('\nPara iniciar o processo digite "start", para saber o total das ações digite "amount", para saber o valor do capital que possui digite "wallet" e para sair digite "exit": ').lower().strip()
 
-print("digite suas compras:")
-contBack = 0
-while True:
-  entradaCompras = input()
-  if entradaCompras == "x":
-    break
-  elif entradaCompras == '<':
-    if contBack < 10:
-      compras.removeLast()
-      comprasCopia.removeLast()
-      contBack += 1
-    else:
-      print('Você não pode mais voltar. Você já voltou 10 operações.')
+  if inicializador == 'start':
+    return True
+  elif inicializador == 'amount':
+    print('\nAinda não a valores para saber o total!')
+    sleep(3)
+    clear()
+    apresentacao()
+    return True
+  elif inicializador == 'wallet':
+    print('\nAinda não a valores para saber o total!')
+    sleep(3)
+    clear()
+    apresentacao()
+    return True
+  elif inicializador == 'exit':
+    return False
   else:
-    compras.enqueue(entradaCompras)
-    comprasCopia.enqueue(entradaCompras)
+    print('\nComando não reconhecido, digite uns dos comando expecificados!')
+    sleep(3)
+    clear()
+    apresentacao()
+    return True
 
-print('Digite sua vendas:')
-contBack = 0
-while True:
-  entradaVendas = input()
-  if entradaVendas == "x":
-    break
-  elif entradaVendas == '<':
-    if contBack < 10:
-      vendas.removeLast()
-      contBack += 1
-    else:
-      print('Você não pode mais voltar. Você já voltou 10 operações.')
-  else:
-    vendas.enqueue(entradaVendas)
+def compras(valores) -> NoReturn:
+  acaoComprada.enqueue(valores)
+  estoqueCompras.append(int(valores[0]))
+  valoresCopia = valores.copy()
+  valoresCopia.append('c')
+  acoesCompraVenda.enqueue(valoresCopia)
 
-# GASTO
-totalGasto = 0
-totalAcoesCompradas = 0
-while True:
-  try:
-    qtdAcoesCompradas, precoCompra = compras.dequeue().split(' ')
-    qtdAcoesCompradas = int(qtdAcoesCompradas)
-    precoCompra = float(precoCompra)
+def vendas(valores) -> NoReturn:
+  acaoVendida.enqueue(valores)
+  estoqueVendas.append(int(valores[0]))
+  valoresCopia = valores.copy()
+  valoresCopia.append('v')
+  acoesCompraVenda.enqueue(valoresCopia)
 
-    totalGasto += qtdAcoesCompradas * precoCompra
-    totalAcoesCompradas += qtdAcoesCompradas
-  except:
-    break
+def total(acoes: FilaArray, name: str):
+  copyacoes = acoes._dados.copy()
+  print(f'\n<----{name}---->')
+  valorAcao = 0
+  for index in range(len(copyacoes)):
+    firstAcao = copyacoes[index]
+    if firstAcao != None:
+      unidade = 1
+      for i in firstAcao:
+        unidade *= float(i)
 
+      valorAcao += unidade
+  print(f'valor {name} R$: {valorAcao:.2f}')
 
-lucro = 0
-while True:
-  try:
-    qtdAcoesVendidas, precoVenda = vendas.dequeue().split(' ')
-    qtdAcoesVendidas = int(qtdAcoesVendidas)
-    precoVenda = float(precoVenda)
-
-    qtdAcoesCompradas, precoCompra = comprasCopia.dequeue().split(' ')
-    qtdAcoesCompradas = int(qtdAcoesCompradas)
-    precoCompra = float(precoCompra)
-
-    gasto = qtdAcoesVendidas * precoCompra
-    vendido = qtdAcoesVendidas * precoVenda
-
-    lucro += vendido - gasto
+def wallet(acCompra: FilaArray, acVenda: FilaArray):
+  qtdAcoesCompradas = 0
+  cont = 1
+  tamanhoCompra = acCompra.size()
+  while cont <= tamanhoCompra:
+    elementoRemovido = acCompra.dequeue()
+    qtdAcoesCompradas += float(elementoRemovido[0])
     
-  except:
-    break
+    acCompra.enqueue(elementoRemovido)
+    
+    cont+=1
 
 
-print("Seu lucro foi de " + str(lucro))
+  cont = 1
+  qtdAcoesVendidas = 0
+  tamanhoVenda = acVenda.size()
+  while cont <= tamanhoVenda:
+    elementoRemovido = acVenda.dequeue()
+    qtdAcoesVendidas += float(elementoRemovido[0])
+    
+    acVenda.enqueue(elementoRemovido)
+    
+    cont+=1
+    
+
+  if qtdAcoesCompradas >= qtdAcoesVendidas:
+    lucro = 0
+    cont = 1
+    while cont <= tamanhoVenda:
+      acoesCompradas, precoCompra = acCompra.dequeue()
+      acoesCompradas = int(acoesCompradas)
+      precoCompra = float(precoCompra)
+
+      while acoesCompradas != 0 and acVenda.size() != 0:
+        acoesVendidas, precoVenda = acVenda.dequeue()
+        acoesVendidas = int(acoesVendidas)
+        precoVenda = float(precoVenda)
+        
+        acoesCompradas -= acoesVendidas
+        lucro += (acoesVendidas * precoVenda) - (acoesVendidas * precoCompra)
+
+      cont += 1
+
+    print('Seu lucro foi de ' + 'R$ ' + str(lucro))
+
+    _exit(0)
+  else:
+    print('\n\nVocê vendeu mais ações do que comprou. Preencha as informações corretamente.')
+    _exit(0)
+
+def vendaMenorOuIgualACompra(acoesVendidasNow) -> bool:
+    qtdAcoesCompra = 0
+    for acoesCompra in estoqueCompras:
+      qtdAcoesCompra += acoesCompra
+  
+    qtdAcoesVendas = 0
+    for acoesVendas in estoqueVendas:
+      qtdAcoesVendas += acoesVendas
+  
+    return (qtdAcoesVendas + int(acoesVendidasNow)) <= qtdAcoesCompra
+    
+
+def entradaDado(dia, contBackOperation = 1):
+  try:
+    while True:
+      print(
+      f'''
+      \t================
+      \t||    Dia {dia}   ||
+      \t================
+      ''')
+      transacoes = input('Informe a quantidade, valor e o tipo de transição: ').lower().strip()
+      if transacoes == 'exit':
+        _exit(0)
+      elif transacoes == 'amount':
+        total(acaoComprada, 'compras')
+        total(acaoVendida, 'vendas')
+        sleep(2)
+        contBackOperation = 0
+        entradaDado(dia)
+      elif transacoes == 'wallet':
+        wallet(acaoComprada, acaoVendida)
+        sleep(2)
+        contBackOperation = 1
+        dia = 0
+        entradaDado(dia)
+      elif transacoes == '<':
+        if (acoesCompraVenda.size() > 0 and contBackOperation <= 10):
+          ultimaOperacao = acoesCompraVenda.removeLast()
+          vendaOuCompra = ultimaOperacao[2]
+  
+          if (vendaOuCompra == 'c'):
+            acaoComprada.removeLast()
+          elif vendaOuCompra == 'v':
+            acaoVendida.removeLast()
+  
+          entradaDado(dia, contBackOperation + 1)
+        else:
+          print('\n\nVOCÊ NÃO PODE VOLTAR MAIS.\n\n')
+          entradaDado(dia, contBackOperation + 1)
+
+      
+      contBackOperation = 1
+      transacoes = transacoes.split()
+      if len(transacoes) > 1:
+        if transacoes[2] == 'c':
+          dia+=1
+          compras(transacoes[:2])
+        elif transacoes[2] == 'v' and vendaMenorOuIgualACompra(transacoes[0]):
+          dia+=1
+          vendas(transacoes[:2])
+        else: 
+          print('\nQuantidade de vendas maior que a quantidades de compras')
+          sleep(3)
+      else:
+        print('\nComando não reconhecido, digite uns dos comando expecificados!')
+        sleep(3)
+  except Exception as e:
+    if e:
+      print(e)
+    print('\nComando não reconhecido, digite uns dos comando expecificados!')
+    sleep(3)
+    clear()
+    entradaDado(dia)
+
+
+def main() -> NoReturn :
+  try:
+    if apresentacao():
+      entradaDado(1)
+  except Exception as e:
+    print(e)
+
+acaoComprada = FilaArray()
+acoesCompraVenda = FilaArray()
+acaoVendida = FilaArray()
+estoqueCompras = []
+estoqueVendas = []
+
+clear = lambda: system('cls' if name == 'nt' else 'clear')
+clear()
+
+main()
