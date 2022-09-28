@@ -1,4 +1,6 @@
+from msilib import PID_TITLE
 from os import system, name, _exit
+from tkinter import SCROLL
 from typing import NoReturn
 from projeto import *
 from time import sleep
@@ -6,7 +8,7 @@ from time import sleep
 if __name__ == '__main__':
   acaoComprada = FilaArray()
   acaoVendida = FilaArray()
-  capital = FilaArray()
+  acoaoEstoque = FilaArray()
 
   clear = lambda: system('cls' if name == 'nt' else 'clear')
   clear()
@@ -87,6 +89,17 @@ if __name__ == '__main__':
     else:
       print(f'\nVocê não possui vendas seu valor em compras é R$: {purchaseValue:.2f}')
 
+  def estoque(qtdVenda: str) -> bool:
+    copyQtdCompras = acaoComprada._dados.copy()
+    copyQtdVendas = acaoVendida._dados.copy()
+    valorEstoque: int = 0
+    for index in range(len(copyQtdCompras)):
+      if copyQtdCompras[index] != None:
+        valorEstoque += int(copyQtdCompras[index][0])
+    if valorEstoque >= int(qtdVenda): 
+      return True
+    return False
+
   def entradaDado(dia):
     try:
       while True:
@@ -114,9 +127,15 @@ if __name__ == '__main__':
           if transacoes[2] == 'c':
             dia+=1
             compras(transacoes[:2])
-          elif transacoes[2] == 'v':
+          elif transacoes[2] == 'v' and estoque(transacoes[0]):
             dia+=1
             vendas(transacoes[:2])
+          else: 
+            print('\nQuantidade de vendas maior que a quantidades de compras')
+            sleep(3)
+        else:
+          print('\nComando não reconhecido, digite uns dos comando expecificados!')
+          sleep(3)
     except Exception as e:
       if e:
         print(e)
