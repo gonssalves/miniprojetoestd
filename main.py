@@ -146,7 +146,7 @@ def wallet(acCompra: FilaArray, acVenda: FilaArray):
 
       cont += 1
 
-    print('Seu lucro foi de ' + 'R$ ' + str(lucro))
+    print('Seu lucro/perda foi de ' + 'R$ ' + str(lucro))
 
     _exit(0)
   else:
