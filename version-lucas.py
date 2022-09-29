@@ -21,6 +21,9 @@ class FilaArray:
   def enqueue(self, e):
     self._dados.append(e)
 
+  def first(self):
+    return self._dados[0]
+
   def size(self):
     return len(self._dados)
   
@@ -114,17 +117,39 @@ def wallet(acCompra: FilaArray, acVenda: FilaArray):
     lucro = 0
     cont = 1
     while cont <= tamanhoVenda:
-      acoesCompradas, precoCompra = acCompra.dequeue()
-      acoesCompradas = int(acoesCompradas)
-      precoCompra = float(precoCompra)
-
-      while acoesCompradas != 0 and acVenda.size() != 0:
+      if int(acVenda.first()[0]) > int(acCompra.first()[0]):
         acoesVendidas, precoVenda = acVenda.dequeue()
         acoesVendidas = int(acoesVendidas)
         precoVenda = float(precoVenda)
+
+        while acoesVendidas > 0 and acCompra.size() > 0:
+          if int(acCompra.first()[0]) > acoesVendidas:
+            acoesCompradas, precoCompra = acCompra.dequeue()
+            acoesCompradas = int(acoesCompradas)
+            precoCompra = float(precoCompra)
+            
+            lucro += (acoesVendidas * precoVenda) - (acoesVendidas * precoCompra)
+            acoesVendidas = 0
+          else:
+            acoesCompradas, precoCompra = acCompra.dequeue()
+            acoesCompradas = int(acoesCompradas)
+            precoCompra = float(precoCompra)
+            
+            acoesVendidas -= acoesCompradas
+            lucro += (acoesCompradas * precoVenda) - (acoesCompradas * precoCompra)
+          print(lucro)
         
-        acoesCompradas -= acoesVendidas
-        lucro += (acoesVendidas * precoVenda) - (acoesVendidas * precoCompra)
+      else:
+        acoesCompradas, precoCompra = acCompra.dequeue()
+        acoesCompradas = int(acoesCompradas)
+        precoCompra = float(precoCompra)
+        while acoesCompradas > 0 and acVenda.size() > 0:
+          acoesVendidas, precoVenda = acVenda.dequeue()
+          acoesVendidas = int(acoesVendidas)
+          precoVenda = float(precoVenda)
+          
+          acoesCompradas -= acoesVendidas
+          lucro += (acoesVendidas * precoVenda) - (acoesVendidas * precoCompra)
 
       cont += 1
 
