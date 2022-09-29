@@ -1,4 +1,3 @@
-#from msilib import PID_TITLE
 from os import system, name, _exit
 from tkinter import SCROLL
 from typing import NoReturn
@@ -95,11 +94,8 @@ def wallet(acCompra: FilaArray, acVenda: FilaArray):
   while cont <= tamanhoCompra:
     elementoRemovido = acCompra.dequeue()
     qtdAcoesCompradas += float(elementoRemovido[0])
-    
     acCompra.enqueue(elementoRemovido)
-    
     cont+=1
-
 
   cont = 1
   qtdAcoesVendidas = 0
@@ -107,12 +103,9 @@ def wallet(acCompra: FilaArray, acVenda: FilaArray):
   while cont <= tamanhoVenda:
     elementoRemovido = acVenda.dequeue()
     qtdAcoesVendidas += float(elementoRemovido[0])
-    
     acVenda.enqueue(elementoRemovido)
-    
     cont+=1
     
-
   if qtdAcoesCompradas >= qtdAcoesVendidas:
     lucro = 0
     cont = 1
