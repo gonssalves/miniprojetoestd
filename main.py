@@ -130,7 +130,6 @@ def wallet(acCompra: FilaArray, acVenda: FilaArray):
             
             acoesVendidas -= acoesCompradas
             lucro += (acoesCompradas * precoVenda) - (acoesCompradas * precoCompra)
-          print(lucro)
         
       else:
         acoesCompradas, precoCompra = acCompra.dequeue()
